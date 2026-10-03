@@ -60,7 +60,7 @@ export class Site {
     this.b.push(fr.m);
     fn(this.b, fr);
     this.b.pop();
-    if (collide) this.w.addBox(fr.d, fr.f, collide[0], collide[1], collide[2] ?? 0, collide[3] ?? 0);
+    if (collide) this.w.addBox(fr.d, fr.f, collide[0], collide[1], collide[2] ?? 0, collide[3] ?? 0, collide[4] ?? 5);
     return fr;
   }
   sign(fr, tex, { x = 0, y = 2, z = 0, ry = 0, w = 2, h = 0.6, glow = true, double = false } = {}) {
@@ -91,7 +91,7 @@ function herald(W) {
     b.sphere(0.14, -4, 10.4, -2, '#e63946', { glow: true });
     // flags
     [-4.6, 4.6].forEach((x) => { b.cyl(0.05, 0.05, 4.5, x, 0, 4.4, '#d6ccc2', 6); });
-  }, { collide: [5.3, 3.2, 0, 0.5] });
+  }, { collide: [5.3, 3.2, 0, 0.5, 11] });
   S.sign(hq, signTexture('HOSHIMACHI HERALD', { bg: '#14111c', fg: '#ffffff', w: 1024, h: 240, font: FONT_COND, neon: false, border: '#e63946', sub: '星町新聞 · EST. 1965' }), { y: 9.7, z: -0.9, w: 8, h: 1.9 });
   S.sign(hq, signTexture('PRESS', { bg: '#e63946', fg: '#fff', w: 512, h: 128, font: FONT_COND }), { y: 3.25, z: 3.62, w: 2.6, h: 0.65 });
   W.flags.push({ m: hq.m, x: -4.6, z: 4.4, h: 4.5, color: '#e63946' }, { m: hq.m, x: 4.6, z: 4.4, h: 4.5, color: '#ffd60a' });
@@ -127,7 +127,7 @@ function herald(W) {
     b.cone(1.5, 1.8, 0, 6.8, 0, '#457b9d', 4, { ry: Math.PI / 4 });
     b.box(0.08, 0.5, 0.05, 0, 5.75, 1.0, '#14111c', { outline: false });
     b.box(0.4, 0.08, 0.05, 0.18, 5.75, 1.0, '#14111c', { outline: false });
-  }, { collide: [1.1, 1.1] });
+  }, { collide: [1.1, 1.1, 0, 0, 9] });
   // kiosk and bikes
   const kk = S.put(Math.sin(-120 * DEG) * 10, Math.cos(-120 * DEG) * 10, -120 + 180, (b) => {
     b.box(2.6, 2.4, 1.8, 0, -0.5, 0, '#ffd60a');
@@ -159,7 +159,7 @@ function station(W) {
     // clock
     b.cyl(0.55, 0.55, 0.1, 0, 3.9, 2.32, '#ffffff', 18, { rx: Math.PI / 2 });
     b.box(0.06, 0.38, 0.04, 0, 3.9, 2.38, '#14111c', { outline: false });
-  }, { collide: [4.7, 2.5, 0, 0] });
+  }, { collide: [4.7, 2.5, 0, 0, 6] });
   S.sign(st, signTexture('星駅', { bg: '#ffffff', fg: '#14111c', w: 512, h: 160, sub: 'HOSHI STATION' }), { y: 3.55, z: 4.12, w: 3.2, h: 1.0 });
   W.landmarks.station = st.d;
   W.stationFrame = st;
@@ -261,7 +261,7 @@ function shrine(W) {
     b.cyl(0.03, 0.03, 1.6, -0.12, 0.45, 1.05, '#f8f4ea', 6, { outline: false });
     // steps
     b.box(2.6, 0.25, 0.9, 0, -0.35, 2.4, '#bdb2a7');
-  }, { collide: [2.7, 2.6, 0, -0.6] });
+  }, { collide: [2.7, 2.6, 0, -0.6, 5.5] });
   S.sign(hall, signTexture('灯籠山', { bg: '#14111c', fg: '#ffd60a', w: 160, h: 420, vertical: true }), { y: 2.7, z: 1.0, w: 0.4, h: 1.05 });
   W.addInteract('bell', S.dir(0, 0.9).clone(), 2.4, { f: hall.f, frame: hall });
   W.landmarks.shrine = hall.d;
@@ -290,7 +290,7 @@ function park(W) {
     b.cyl(0.8, 0.8, 0.12, 0, 7.4, 1.72, '#ffffff', 20, { rx: Math.PI / 2 });
     b.box(0.07, 0.6, 0.04, 0, 7.4, 1.8, '#14111c', { outline: false });
     b.box(2.6, 0.3, 2.6, 0, 8.2, 0.5, '#52796f');
-  }, { collide: [6.2, 2.3] });
+  }, { collide: [6.2, 2.3, 0, 0, 9.5] });
   S.sign(sc, signTexture('日向高校', { bg: '#f6f1e1', fg: '#2f3e46', w: 512, h: 128, sub: 'HINATA HIGH SCHOOL' }), { y: 5.6, z: 1.73, w: 2.2, h: 0.6 });
   W.landmarks.park = sc.d;
   // school fence
@@ -410,7 +410,7 @@ function beach(W) {
   P.b.cone(0.75, 0.9, 0, 8.2, 0, '#14111c', 10);
   P.b.box(0.8, 1.3, 0.06, 0, 0, 1.1, '#5c3d2e');
   P.b.pop();
-  W.addCircle(ld, 1.3);
+  W.addCircle(ld, 1.3, 9);
   W.lighthouse = { m: lm, y: 7.7 };
   // rocks on the island
   for (let i = 0; i < 6; i++) {
@@ -448,7 +448,7 @@ function alley(W) {
       b.cyl(0.05, 0.05, h, -1.3, -0.2, 1.65, '#6c757d', 6, { outline: false });
       K.chochin(b, -1.0, 2.0, 1.85, '#e63946');
       K.chochin(b, 1.0, 2.0, 1.85, '#e63946');
-    }, { collide: [1.5, 1.7] });
+    }, { collide: [1.5, 1.7, 0, 0, 6] });
     S.sign(fr, signTexture(jp, { fg: sc, w: 160, h: 480, vertical: true, neon: true }), { x: 1.6, y: 2.0, z: 1.75, w: 0.45, h: 1.4, ry: -Math.PI / 2, double: true });
     k++;
   });
@@ -511,7 +511,7 @@ function homes(W) {
       // stairwell
       b.box(1.6, 10.4, 1.6, 6.9, -1, 0, '#d6ccc2');
       b.box(1.0, 1.4, 0.05, 6.9, 0, 0.82, '#5c3d2e');
-    }, { collide: [7.8, 2.4] });
+    }, { collide: [7.8, 2.4, 0, 0, 10.5] });
     S.sign(fr, signTexture(`${seed} 号棟`, { bg: '#e8e1d5', fg: '#457b9d', w: 256, h: 128 }), { x: -5.5, y: 9.6, z: 2.05, w: 1.4, h: 0.7 });
     return fr;
   };
@@ -632,7 +632,7 @@ function scatter(W) {
     if (rnd() < 0.3) K.bush(b, 0, 0, 0.8 + rnd() * 0.6, rnd() < 0.5 ? '#3f8a43' : '#52b788');
     else K.tree(b, 0, 0, { kind, s: 0.8 + rnd() * 0.6, seed: 500 + i, color: ['#4f9d4a', '#5aa65a', '#3e8e41', '#6ab04c'][i % 4] });
     b.pop();
-    W.addCircle(d, 0.45);
+    W.addCircle(d, 0.45, 3);
   }
   // grass tufts and flower patches so the fields feel alive
   const fcols = ['#ffd60a', '#ff8fab', '#ffffff', '#c77dff', '#f77f00'];

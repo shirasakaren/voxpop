@@ -426,6 +426,12 @@ export class UI {
       <div class="ex">EXCLUSIVE</div>`;
     el.hidden = false;
     this.modal = 'front';
+    paper.style.setProperty('--fit', '1');
+    const fit = Math.min(1, (innerHeight - 110) / paper.offsetHeight, (innerWidth - 24) / paper.offsetWidth);
+    paper.style.setProperty('--fit', fit.toFixed(3));
+    const m = `${(-(1 - fit) * paper.offsetHeight) / 2}px`;
+    paper.style.marginTop = m;
+    paper.style.marginBottom = m;
     paper.classList.remove('spin'); void paper.offsetWidth; paper.classList.add('spin');
     audio.whoosh();
     setTimeout(() => { audio.stamp(); this.confetti.burst(innerWidth / 2, innerHeight / 3, 160); audio.fanfare(); }, 1000);
@@ -435,7 +441,7 @@ export class UI {
         audio.click();
         paper.style.transition = 'transform .6s var(--ease-out), opacity .6s';
         paper.style.transform = 'translateY(-120vh) rotate(-20deg)';
-        setTimeout(() => { el.hidden = true; paper.style = ''; this.modal = null; resolve(); }, 600);
+        setTimeout(() => { el.hidden = true; paper.removeAttribute('style'); this.modal = null; resolve(); }, 600);
       };
       $('#fp-print').onclick = go;
       setTimeout(() => { this.advanceFn = go; }, 1100);

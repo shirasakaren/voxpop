@@ -99,9 +99,9 @@ function orbitShot(out, dist, elev, lookShift) {
   out.focus.copy(d).lerp(new THREE.Vector3(0, 1, 0), 0.3).normalize();
 }
 
-function surfaceShot(out, dir, { height = 16, back = 14, side = 0, lookUp = 1, heading = 180, shift = 0 }) {
+function surfaceShot(out, dir, { height = 16, back = 14, side = 0, lookUp = 1, heading = 180, shift = 0, fwd = null }) {
   const up = dir.clone();
-  const f = forwardFromHeading(up, heading);
+  const f = fwd ? fwd.clone().addScaledVector(up, -fwd.dot(up)).normalize() : forwardFromHeading(up, heading);
   const right = new THREE.Vector3().crossVectors(up, f).normalize();
   const base = surfacePoint(dir, 0);
   out.pos.copy(base).addScaledVector(up, height).addScaledVector(f, -back).addScaledVector(right, side);
@@ -123,7 +123,7 @@ function computeShot(dt) {
   } else if (shot === 'rin') {
     const d = rin.dir;
     const t = shotT;
-    surfaceShot(target, d, { height: 2.6 + (1 - t) * 6, back: 6.5 + (1 - t) * 8, side: 1.5, lookUp: 1.3, heading: 20, shift: m ? 0 : 2.6 });
+    surfaceShot(target, d, { height: 1.9 + (1 - t) * 7, back: 5.2 + (1 - t) * 9, side: -1.2, lookUp: 1.2, fwd: rin.fwd.clone().negate(), shift: m ? 0 : 1.9 });
   } else if (shot === 'town') {
     const a = districtDirs[townIdx], b = districtDirs[Math.min(townIdx + 1, districtDirs.length - 1)];
     const dir = a.clone().lerp(b, townBlend).normalize();
@@ -361,10 +361,23 @@ function heroIntro() {
   // drag the planet
   let drag = null;
   canvas.style.pointerEvents = 'auto';
-  const hero = $('#hero');
-  hero.addEventListener('pointerdown', (e) => { if (e.target.closest('a,button,.ht')) return; drag = { x: e.clientX, t: performance.now() }; cursor.classList.add('drag'); });
+  canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, x0: e.clientX, t: performance.now() }; cursor.classList.add('drag'); });
   addEventListener('pointermove', (e) => { if (!drag) return; const dx = e.clientX - drag.x; drag.x = e.clientX; dragYaw -= dx * 0.004; orbitVel = -dx * 0.0008; });
-  addEventListener('pointerup', () => { if (drag) { cursor.classList.remove('drag'); drag = null; } });
+  addEventListener('pointerup', (e) => {
+    if (!drag) return;
+    const moved = Math.abs(e.clientX - drag.x0);
+    cursor.classList.remove('drag');
+    if (moved < 6 && performance.now() - drag.t < 400) {
+      const lines = ['Hey! That tickles.', 'This whole town fits in your hand.', 'Spin it again. I dare you.', 'Somewhere down there, a cat is napping.', 'I live here. Well, I work here. Same thing.'];
+      rin.play(['wave', 'cheer', 'think'][Math.floor(Math.random() * 3)], 1.3);
+      say(rin, lines[Math.floor(Math.random() * lines.length)]);
+      orbitVel += 0.6;
+      audio.pop('E5');
+    }
+    drag = null;
+  });
+  canvas.addEventListener('mouseenter', () => { cursor.classList.add('drag'); clabel.textContent = ''; });
+  canvas.addEventListener('mouseleave', () => cursor.classList.remove('drag'));
 }
 
 // ============ TICKER ============
@@ -640,7 +653,7 @@ function idle() {
   const lines = ['Still there? The town is waiting.', 'I could use some help with my notebook.', 'Psst. The play button is right there.', 'Fun fact: you can drag the planet up top.'];
   let n = 0;
   setInterval(() => {
-    if (performance.now() - lastActive > 16000 && !$('#loader')) {
+    if (n < 3 && performance.now() - lastActive > 16000 && !$('#loader')) {
       lastActive = performance.now();
       rinToast(lines[n++ % lines.length]);
       rin.play('wave', 1.4);

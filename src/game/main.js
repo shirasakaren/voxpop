@@ -71,8 +71,9 @@ async function boot() {
   const d = site.dir(0, 3.4);
   player = new Player(world, d, site.fwd(d, 0));
   player.camF.copy(player.fwd);
-  rig = new CameraRig(camera, player);
+  rig = new CameraRig(camera, player, world);
   npcs = new NPCs(world, player);
+  npcs.onKick = (k) => { if (k === 1) ui.bubble(player.char, 'Oops. Sorry, ball.', 2, true); if (k === 15) { ui.toast('Side story', 'Fifteen kicks. The Hinata High team might want you.'); audio.chime(); } };
   input = new Input(canvas, ui);
   bindInput();
   applyAssignmentLook(true);
@@ -316,7 +317,7 @@ async function useProp(it) {
       if (Math.hypot(input.move.x, input.move.y) > 0.2 && performance.now() - t0 > 400) break;
     }
     c.state = 'idle';
-    rig.targetDist = 13;
+    rig.targetDist = 14;
     return;
   } else if (it.kind === 'cat') {
     facePlayerTo(it.cat.root.position);

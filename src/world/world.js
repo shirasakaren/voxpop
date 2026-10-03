@@ -78,11 +78,29 @@ export class World {
     this.root.add(mesh);
     return mesh;
   }
-  addBox(d, f, hx, hz, ox = 0, oz = 0) {
+  addBox(d, f, hx, hz, ox = 0, oz = 0, h = 5) {
     const r = new THREE.Vector3().crossVectors(d, f).normalize();
-    this.boxes.push({ c: d.clone(), r, f: f.clone(), hx, hz, ox, oz, reach: Math.cos((Math.hypot(hx, hz) + Math.hypot(ox, oz) + 3) / R) });
+    this.boxes.push({ c: d.clone(), r, f: f.clone(), hx, hz, ox, oz, h: h + heightAt(d), reach: Math.cos((Math.hypot(hx, hz) + Math.hypot(ox, oz) + 3) / R) });
   }
-  addCircle(d, r) { this.circles.push({ c: d.clone(), r, reach: Math.cos((r + 3) / R) }); }
+  addCircle(d, r, h = 0) { this.circles.push({ c: d.clone(), r, h: h ? h + heightAt(d) : 0, reach: Math.cos((r + 3) / R) }); }
+
+  // Is a world-space point inside something tall? Used to keep the camera out of buildings.
+  occluded(p) {
+    const len = p.length();
+    const d = tmpV2.copy(p).divideScalar(len);
+    const alt = len - R;
+    for (const b of this.boxes) {
+      if (alt > b.h || d.dot(b.c) < b.reach) continue;
+      const q = tmpV.copy(d).multiplyScalar(R / d.dot(b.c)).addScaledVector(b.c, -R);
+      const lx = q.dot(b.r) - b.ox, lz = q.dot(b.f) - b.oz;
+      if (Math.abs(lx) < b.hx + 0.3 && Math.abs(lz) < b.hz + 0.3) return true;
+    }
+    for (const c of this.circles) {
+      if (!c.h || alt > c.h || d.dot(c.c) < c.reach) continue;
+      if (Math.acos(Math.min(1, d.dot(c.c))) * R < c.r + 0.6) return true;
+    }
+    return false;
+  }
   addInteract(kind, d, radius, data = {}) { this.interacts.push({ kind, d: d.clone(), radius, ...data }); }
 
   blocked(d, rad) {

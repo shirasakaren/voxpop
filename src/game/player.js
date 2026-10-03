@@ -133,12 +133,13 @@ export class Player {
 }
 
 export class CameraRig {
-  constructor(camera, player) {
+  constructor(camera, player, world) {
     this.cam = camera;
     this.p = player;
-    this.pitch = 34 * DEG;
-    this.dist = 13;
-    this.targetDist = 13;
+    this.world = world;
+    this.pitch = 48 * DEG;
+    this.dist = 14;
+    this.targetDist = 14;
     this.pos = new THREE.Vector3();
     this.look = new THREE.Vector3();
     this.up = new THREE.Vector3(0, 1, 0);
@@ -159,7 +160,8 @@ export class CameraRig {
     const up = p.up;
     const base = p.pos.clone().addScaledVector(up, 1.1);
     outLook.copy(base);
-    outPos.copy(base).addScaledVector(p.camF, -this.dist * Math.cos(this.pitch)).addScaledVector(up, this.dist * Math.sin(this.pitch));
+    const dist = Math.min(this.dist, this.safeDist ?? this.dist);
+    outPos.copy(base).addScaledVector(p.camF, -dist * Math.cos(this.pitch)).addScaledVector(up, dist * Math.sin(this.pitch));
   }
 
   update(dt, input) {
@@ -167,10 +169,22 @@ export class CameraRig {
     const z = input.consumeZoom();
     if (this.mode === 'follow') {
       if (d.x) this.p.camF.applyAxisAngle(this.p.up, -d.x * 0.005);
-      this.pitch = THREE.MathUtils.clamp(this.pitch + d.y * 0.003, 10 * DEG, 70 * DEG);
+      this.pitch = THREE.MathUtils.clamp(this.pitch + d.y * 0.003, 14 * DEG, 76 * DEG);
       this.targetDist = THREE.MathUtils.clamp(this.targetDist + z * 1.2, 6, 24);
     }
     this.dist += (this.targetDist - this.dist) * Math.min(1, dt * 5);
+    // pull the camera in when a building sits between it and Rin
+    if (this.mode === 'follow' && this.world) {
+      const up = this.p.up;
+      const base = this.p.pos.clone().addScaledVector(up, 1.1);
+      const dirOut = new THREE.Vector3().addScaledVector(this.p.camF, -Math.cos(this.pitch)).addScaledVector(up, Math.sin(this.pitch));
+      let safe = this.dist;
+      for (let i = 2; i <= 10; i++) {
+        const t = (i / 10) * this.dist;
+        if (this.world.occluded(base.clone().addScaledVector(dirOut, t))) { safe = Math.max(3.2, t - 1.2); break; }
+      }
+      this.safeDist = this.safeDist === undefined ? safe : this.safeDist + (safe - this.safeDist) * Math.min(1, dt * (safe < this.safeDist ? 10 : 2));
+    }
     const tp = new THREE.Vector3(), tl = new THREE.Vector3();
     this.compute(tp, tl);
     const k = this.mode === 'shot' ? 3.2 : 9;
@@ -186,7 +200,7 @@ export class CameraRig {
     this.cam.lookAt(this.look);
   }
 
-  // two-shot framing between Rin and someone else
+  // two-shot framing between Rin and someone else, avoiding buildings and trees
   frameDialogue(other) {
     const p = this.p;
     const up = p.up;
@@ -194,15 +208,29 @@ export class CameraRig {
     const mid = a.clone().add(b).multiplyScalar(0.5).addScaledVector(up, 1.25);
     const across = b.clone().sub(a);
     across.addScaledVector(up, -across.dot(up));
+    const span = across.length();
+    across.normalize();
     const side = new THREE.Vector3().crossVectors(up, across).normalize();
-    // choose the side closer to the current camera
     const toCam = this.pos.clone().sub(mid);
     if (side.dot(toCam) < 0) side.negate();
-    const dist = Math.max(3.6, across.length() * 1.6 + 2.2);
-    this.shot = {
-      pos: mid.clone().addScaledVector(side, dist).addScaledVector(up, 0.9).addScaledVector(across.normalize(), -0.6),
-      look: mid.clone().addScaledVector(up, -0.15),
+    const dist = Math.max(3.6, span * 1.6 + 2.2);
+    const look = mid.clone().addScaledVector(up, -0.15);
+    const clear = (pos) => {
+      if (!this.world) return true;
+      for (let i = 1; i <= 8; i++) if (this.world.occluded(look.clone().lerp(pos, i / 8))) return false;
+      return true;
     };
+    let best = null;
+    outer: for (const lift of [0.9, 2.4, 4.2, 6.5]) {
+      for (const s of [1, -1]) {
+        for (const k of [1, 0.75, 0.55]) {
+          const pos = mid.clone().addScaledVector(side, s * dist * k).addScaledVector(up, lift).addScaledVector(across, -0.6);
+          if (clear(pos)) { best = pos; break outer; }
+        }
+      }
+    }
+    if (!best) best = mid.clone().addScaledVector(side, dist * 0.6).addScaledVector(up, 8);
+    this.shot = { pos: best, look };
     this.mode = 'shot';
   }
   release() { this.mode = 'follow'; this.shot = null; }

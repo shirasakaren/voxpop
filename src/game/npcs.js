@@ -5,6 +5,8 @@ import { randomLook } from '../world/characters.js';
 import { markerTexture, noteTexture, mulberry, dotTexture } from '../world/textures.js';
 import { Builder } from '../world/builder.js';
 import { Site } from '../world/districts.js';
+import { toonMat, outlineMat } from '../world/toon.js';
+import { audio } from '../shared/audio.js';
 
 const tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
 
@@ -55,6 +57,13 @@ export class NPCs {
     // the cat
     this.cat = this.makeCat();
 
+    // kickable balls
+    this.balls = [
+      this.makeBall('park', 3.2, -2.5, ['#ffffff', '#14111c'], 0.32),
+      this.makeBall('beach', 4.5, -9.5, ['#e63946', '#ffffff', '#ffd60a', '#4cc9f0'], 0.42),
+      this.makeBall('herald', -6.5, -5.5, ['#ffd60a', '#e63946'], 0.3),
+    ];
+
     // scoops
     const nt = noteTexture();
     this.scoops = SCOOPS.map((s, i) => {
@@ -94,6 +103,76 @@ export class NPCs {
     this.world.place(root, cat.dir, cat.fwd);
     this.world.addInteract('cat', cat.dir, 1.4, { cat });
     return cat;
+  }
+
+  makeBall(district, dx, dz, cols, r) {
+    const site = this.world.districtSite(district);
+    const d = site.dir(dx, dz);
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 128;
+    const x = c.getContext('2d');
+    const n = cols.length * 2;
+    for (let i = 0; i < n; i++) { x.fillStyle = cols[i % cols.length]; x.fillRect((i / n) * 256, 0, 256 / n + 1, 128); }
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const geo = new THREE.SphereGeometry(r, 20, 14);
+    const mesh = new THREE.Mesh(geo, toonMat({ map: tex }));
+    mesh.castShadow = true;
+    const outline = new THREE.Mesh(geo, outlineMat(1));
+    const spin = new THREE.Group();
+    spin.add(mesh); spin.add(outline);
+    const holder = new THREE.Group();
+    holder.add(spin);
+    spin.position.y = r;
+    this.world.root.add(holder);
+    return { dir: d.clone(), fwd: site.fwd(d, 0), vel: new THREE.Vector3(), r, holder, spin, cool: 0, wq: new THREE.Quaternion() };
+  }
+
+  updateBalls(dt) {
+    const p = this.player;
+    for (const b of this.balls) {
+      b.cool -= dt;
+      const dist = b.dir.angleTo(p.dir) * R;
+      if (dist < b.r + 0.45 && b.cool <= 0) {
+        const away = b.dir.clone().sub(p.dir);
+        away.addScaledVector(b.dir, -away.dot(b.dir));
+        if (away.lengthSq() < 1e-10) away.copy(p.fwd);
+        away.normalize();
+        const power = Math.max(3, p.speed * 1.6) + (p.grounded ? 0 : 3);
+        b.vel.copy(away).multiplyScalar(power);
+        b.hop = p.speed > 5 || !p.grounded ? 1.6 : 0.6;
+        b.cool = 0.25;
+        audio.pop(p.speed > 5 ? 'C4' : 'G4');
+        this.kicks = (this.kicks || 0) + 1;
+        this.onKick?.(this.kicks);
+      }
+      const sp = b.vel.length();
+      if (sp > 0.02) {
+        const vdir = b.vel.clone().normalize();
+        const axis = new THREE.Vector3().crossVectors(b.dir, vdir).normalize();
+        const prev = b.dir.clone();
+        b.dir.applyAxisAngle(axis, (sp * dt) / R).normalize();
+        this.world.resolve(b.dir, b.r);
+        if (groundAt(b.dir) === null) { b.dir.copy(prev); b.vel.multiplyScalar(-0.5); }
+        const moved = prev.angleTo(b.dir) * R;
+        if (moved < sp * dt * 0.5) { b.vel.multiplyScalar(-0.55); audio.pop('D4'); }
+        // transport velocity onto new tangent plane
+        const q = new THREE.Quaternion().setFromUnitVectors(prev, b.dir);
+        b.vel.applyQuaternion(q);
+        b.vel.addScaledVector(b.dir, -b.vel.dot(b.dir));
+        b.fwd.applyQuaternion(q).addScaledVector(b.dir, -b.fwd.dot(b.dir)).normalize();
+        // rolling spin in world space
+        const rollAxis = new THREE.Vector3().crossVectors(b.dir, b.vel).normalize();
+        const qs = new THREE.Quaternion().setFromAxisAngle(rollAxis, (sp * dt) / b.r);
+        b.wq.premultiply(qs);
+        b.vel.multiplyScalar(Math.exp(-dt * 1.1));
+      }
+      b.hop = Math.max(0, (b.hop || 0) - dt * 3);
+      const y = Math.abs(Math.sin(b.hop * Math.PI)) * b.hop * 0.8;
+      // keep the rolling orientation in world space
+      this.world.place(b.holder, b.dir, b.fwd, y);
+      b.spin.quaternion.copy(b.holder.quaternion).invert().multiply(b.wq);
+    }
   }
 
   setMarkers(map) {
@@ -222,6 +301,8 @@ export class NPCs {
     this.world.place(c.root, c.dir, c.fwd, Math.abs(Math.sin(c.hop)) * 0.08);
     c.tail.rotation.z = Math.sin(t * 3) * 0.4;
     c.body.scale.y = 1 + Math.sin(t * 2) * 0.03;
+
+    this.updateBalls(dt);
 
     // scoops
     for (const s of this.scoops) {
