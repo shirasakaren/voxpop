@@ -1,0 +1,38 @@
+:root {
+  --ink: #14111c;
+  --ink-2: #221d2e;
+  --paper: #fbf6ea;
+  --paper-2: #f1e9d6;
+  --red: #e63946;
+  --red-dk: #b21e2b;
+  --yellow: #ffd60a;
+  --cyan: #4cc9f0;
+  --mint: #06d6a0;
+  --pink: #ff8fab;
+  --f-display: 'Anton', 'Dela Gothic One', Impact, sans-serif;
+  --f-jp: 'Dela Gothic One', 'Zen Kaku Gothic New', sans-serif;
+  --f-body: 'Space Grotesk', system-ui, sans-serif;
+  --f-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-back: cubic-bezier(.34, 1.56, .64, 1);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--f-body); color: var(--ink); background: var(--paper); }
+button { font: inherit; color: inherit; cursor: pointer; }
+img { max-width: 100%; display: block; }
+kbd {
+  font-family: var(--f-display); font-size: .8em; letter-spacing: .04em;
+  display: inline-block; padding: .1em .45em; border: 2px solid currentColor; border-radius: 4px;
+  box-shadow: 0 2px 0 currentColor; line-height: 1.2;
+}
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}

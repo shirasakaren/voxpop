@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#e63946" />
+  <title>VOXPOP: Every town has a voice</title>
+  <meta name="description" content="VOXPOP is a tiny anime game about listening. Walk a planet-sized town as rookie reporter Rin, collect real opinions and print the front page." />
+  <meta property="og:title" content="VOXPOP: Every town has a voice" />
+  <meta property="og:description" content="A tiny anime game about listening. Walk the town. Ask real questions. Print the front page." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e63946'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' font-family='Arial Black' fill='%23fff'%3EV%3C/text%3E%3C/svg%3E" />
+</head>
+<body class="site">
+  <a class="skip" href="#story">Skip to the story</a>
+
+  <!-- PRELOADER -->
+  <div id="loader" aria-live="polite">
+    <div class="ld-grid"></div>
+    <div class="ld-count"><span id="ld-num">00</span><small>%</small></div>
+    <div class="ld-word" aria-hidden="true">
+      <span>S</span><span>T</span><span>O</span><span>P</span><span>&nbsp;</span><span>T</span><span>H</span><span>E</span><span>&nbsp;</span><span>P</span><span>R</span><span>E</span><span>S</span><span>S</span><span>E</span><span>S</span>
+    </div>
+    <p class="ld-line" id="ld-line">Inking the town</p>
+    <div class="ld-enter" id="ld-enter" hidden>
+      <p>Hoshimachi is ready. How would you like to visit?</p>
+      <div class="ld-btns">
+        <button class="ld-btn" data-sound="1" data-cursor="ask"><i class="eq"><b></b><b></b><b></b></i>With sound</button>
+        <button class="ld-btn ghost" data-sound="0" data-cursor="ask">Quietly</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D world -->
+  <canvas id="world" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- cursor -->
+  <div id="cursor" aria-hidden="true"><div class="c-ring"><span class="c-label"></span></div><div class="c-dot"></div></div>
+
+  <!-- NAV -->
+  <header class="nav">
+    <a class="nav-logo" href="#top" data-cursor="read" aria-label="VOXPOP home">
+      <span>V</span><span>O</span><span>X</span><span class="r">P</span><span class="r">O</span><span class="r">P</span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#story" data-cursor="read"><i>01</i>Story</a>
+      <a href="#town" data-cursor="read"><i>02</i>Town</a>
+      <a href="#people" data-cursor="read"><i>03</i>People</a>
+      <a href="#topics" data-cursor="read"><i>04</i>Topics</a>
+      <a href="#how" data-cursor="read"><i>05</i>Play</a>
+    </nav>
+    <div class="nav-right">
+      <button class="nav-time" id="nav-time" aria-label="Change time of day" data-cursor="ask"><span class="sun"></span><em id="nav-time-label">Morning</em></button>
+      <button class="nav-sound" id="nav-sound" aria-label="Toggle sound" data-cursor="ask"><i class="eq"><b></b><b></b><b></b><b></b></i></button>
+      <a class="nav-play magnetic" href="./play.html" data-cursor="play"><span>Play now</span></a>
+      <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-expanded="false"><i></i><i></i></button>
+    </div>
+  </header>
+  <div class="mnav" id="mnav" hidden>
+    <a href="#story">Story</a><a href="#town">Town</a><a href="#people">People</a><a href="#topics">Topics</a><a href="#how">How to play</a><a href="./play.html" class="mnav-play">Play now</a>
+  </div>
+
+  <!-- progress rail -->
+  <aside class="rail" aria-hidden="true">
+    <div class="rail-track"><i id="rail-fill"></i></div>
+    <div class="rail-label"><b id="rail-no">P.01</b><span id="rail-name">Front page</span></div>
+  </aside>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero" id="hero" data-chapter="Front page" data-shot="orbit">
+      <div class="hero-meta">
+        <span>VOL. 61 · NO. 001</span><span>HOSHIMACHI 星町</span><span id="hero-weather">21°C · CLEAR</span>
+      </div>
+      <h1 class="hero-title" aria-label="VOXPOP">
+        <span class="ht-row"><span class="ht">V</span><span class="ht">O</span><span class="ht">X</span></span>
+        <span class="ht-row r2"><span class="ht red">P</span><span class="ht red">O</span><span class="ht red">P</span></span>
+      </h1>
+      <div class="hero-jp" aria-hidden="true">声を<br/>集めろ</div>
+      <p class="hero-lede split">Every town has a voice. <em>Go ask for it.</em></p>
+      <p class="hero-sub">A tiny anime game about listening. Walk a planet-sized town, collect real opinions and print the front page.</p>
+      <div class="hero-cta">
+        <a href="./play.html" class="btn-main magnetic" data-cursor="play"><span>Start your shift</span><i>→</i></a>
+        <a href="#story" class="btn-ghost" data-cursor="read">Read the story</a>
+      </div>
+      <div class="hero-hint"><span class="mouse"><i></i></span>Scroll. Or drag the planet.</div>
+      <div class="hero-sticker" aria-hidden="true">FREE<br/>TO PLAY<small>in your browser</small></div>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker" aria-label="Headlines">
+      <div class="ticker-tag">BREAKING</div>
+      <div class="ticker-track" id="ticker">
+        <span>Rookie reporter asks real questions</span><span>Kaigan Beach bottles up again this week</span><span>Ramen Hirano still open at 3 a.m.</span><span>Tofu shop on Arcade Street closes after 40 years</span><span>Shrine bell rings, crow answers</span><span>Thirty-six degrees at the station. In the shade.</span><span>Local cat refuses to be interviewed</span>
+      </div>
+    </div>
+
+    <!-- CHAPTER 1: STORY -->
+    <section class="chap story" id="story" data-chapter="The assignment" data-shot="rin">
+      <div class="chap-head">
+        <span class="chap-no">01</span>
+        <h2 class="chap-title split-lines">The assignment</h2>
+        <span class="chap-jp">任務</span>
+      </div>
+      <div class="story-grid">
+        <div class="story-text">
+          <p class="big reveal">Meet Rin Sakuraba. Nineteen. First week at the Hoshimachi Herald.</p>
+          <p class="reveal">Her editor gave her one notebook and one rule.</p>
+          <p class="quote reveal">"Ask real people. Write down what they really think."</p>
+          <p class="reveal">No experts. No press releases. Just a lifeguard, a fisherman, a grandmother, a kid on a bench. People who never get asked.</p>
+          <p class="reveal">That is the whole game. You walk. You ask. You listen. Then you print it.</p>
+        </div>
+        <div class="badge-wrap">
+          <div class="pressbadge tilt" id="pressbadge" data-cursor="ask">
+            <div class="pb-holo"></div>
+            <div class="pb-top"><span>PRESS</span><b>HERALD</b></div>
+            <div class="pb-photo"><img id="pb-img" alt="Portrait of Rin Sakuraba" /></div>
+            <div class="pb-name">RIN SAKURABA</div>
+            <div class="pb-role">Rookie reporter · ID 0419</div>
+            <div class="pb-bar"></div>
+            <div class="pb-say" id="pb-say">Click me. I dare you.</div>
+          </div>
+          <p class="badge-cap">Her press badge. Still smells like laminate.</p>
+        </div>
+      </div>
+      <div class="notes" id="notes">
+        <div class="note n1 reveal" data-cursor="ask"><b>Mon.</b> Beach. Bottles everywhere. Ask Hana why she cares so much.</div>
+        <div class="note n2 reveal" data-cursor="ask"><b>Tue.</b> Fumi sweeps the shrine alone. Bring tea next time.</div>
+        <div class="note n3 reveal" data-cursor="ask"><b>Wed.</b> Sora says I paid for this app with my location. Hm.</div>
+      </div>
+    </section>
+
+    <!-- CHAPTER 2: TOWN -->
+    <section class="chap town" id="town" data-chapter="The town" data-shot="town">
+      <div class="town-pin">
+        <div class="chap-head light">
+          <span class="chap-no">02</span>
+          <h2 class="chap-title split-lines">A town that loops forever</h2>
+          <span class="chap-jp">星町</span>
+        </div>
+        <p class="town-lede">Hoshimachi sits on a planet you can walk around in a minute. Seven hand-built districts. Keep walking and you end up where you started. Usually with a new story.</p>
+        <div class="town-track" id="town-track"></div>
+        <div class="town-mini" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" /><g id="mini-dots"></g></svg><span id="mini-label">Herald Plaza</span></div>
+      </div>
+    </section>
+
+    <!-- CHAPTER 3: PEOPLE -->
+    <section class="chap people" id="people" data-chapter="The people" data-shot="people">
+      <div class="chap-head">
+        <span class="chap-no">03</span>
+        <h2 class="chap-title split-lines">Everyone has a take</h2>
+        <span class="chap-jp">住人</span>
+      </div>
+      <p class="people-lede reveal">Eleven residents. None of them agree. All of them have something worth hearing. Hover a card to meet them.</p>
+      <div class="cast" id="cast"></div>
+    </section>
+
+    <!-- CHAPTER 4: TOPICS -->
+    <section class="chap topics" id="topics" data-chapter="The questions" data-shot="topics">
+      <div class="chap-head light">
+        <span class="chap-no">04</span>
+        <h2 class="chap-title split-lines">Five questions worth asking</h2>
+        <span class="chap-jp">質問</span>
+      </div>
+      <p class="topics-lede reveal">Every assignment is a real issue. The facts are real too. The game just makes them personal.</p>
+      <ol class="tlist" id="tlist"></ol>
+      <div class="tpreview" id="tpreview" aria-hidden="true"></div>
+    </section>
+
+    <!-- CHAPTER 5: HOW -->
+    <section class="chap how" id="how" data-chapter="How it plays" data-shot="how">
+      <div class="chap-head">
+        <span class="chap-no">05</span>
+        <h2 class="chap-title split-lines">Walk. Ask. Print.</h2>
+        <span class="chap-jp">遊び方</span>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <span class="step-no">A</span>
+          <h3>Walk the planet</h3>
+          <p>WASD or arrows on a keyboard. A thumb joystick on a phone. Go on, try your keys right now.</p>
+          <div class="keys" id="keys">
+            <kbd data-k="w">W</kbd><div class="krow"><kbd data-k="a">A</kbd><kbd data-k="s">S</kbd><kbd data-k="d">D</kbd></div>
+            <div class="krow"><kbd data-k="shift" class="wide">Shift</kbd><kbd data-k=" " class="wider">Space</kbd><kbd data-k="e">E</kbd></div>
+          </div>
+          <div class="joy-demo" id="joy-demo" data-cursor="drag"><div class="joy-knob"></div><span>Drag me</span></div>
+        </article>
+        <article class="step">
+          <span class="step-no">B</span>
+          <h3>Ask your way</h3>
+          <p>Every conversation lets you choose how to ask. Gentle or direct. People open up differently.</p>
+          <div class="demo-dlg" id="demo-dlg">
+            <div class="dd-name">Hana Mizuki <small>Lifeguard</small></div>
+            <p class="dd-text" id="dd-text">Hey, Herald girl. You here about the bottles?</p>
+            <div class="dd-choices">
+              <button data-i="0" data-cursor="ask"><b>1</b>Straight to it</button>
+              <button data-i="1" data-cursor="ask"><b>2</b>Warm up first</button>
+            </div>
+          </div>
+        </article>
+        <article class="step">
+          <span class="step-no">C</span>
+          <h3>Print the front page</h3>
+          <p>Four voices make a story. Bring them to the Chief and watch your words hit the press.</p>
+          <div class="mini-paper" id="mini-paper" data-cursor="ask">
+            <div class="mp-mast">The Hoshimachi Herald</div>
+            <div class="mp-hl">Town splits over plastic. Sea is not waiting.</div>
+            <div class="mp-cols"><i></i><i></i><i></i><i></i></div>
+            <div class="mp-stamp">PRINTED</div>
+          </div>
+        </article>
+      </div>
+      <div class="extras">
+        <span>Pet the cat</span><span>Ring the shrine bell</span><span>Find 12 hidden scoops</span><span>Sit on a bench</span><span>Photo mode</span><span>Gamepad ready</span><span>Saves automatically</span>
+      </div>
+    </section>
+
+    <!-- CHAPTER 6: CTA -->
+    <section class="chap final" id="final" data-chapter="Your turn" data-shot="final">
+      <p class="final-kicker">Last page</p>
+      <h2 class="final-title"><span class="fl">Your notebook</span><span class="fl">is empty.</span><span class="fl red">Let's fix that.</span></h2>
+      <a href="./play.html" class="btn-huge magnetic" id="btn-huge" data-cursor="play"><span>Start your shift</span></a>
+      <p class="final-note">Runs in your browser. Desktop, tablet or phone. About 30 minutes for the full week. Your progress saves itself.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-mast">The Hoshimachi Herald</div>
+    <div class="foot-grid">
+      <div><b>VOXPOP</b><p>A short story about listening. Made with Three.js, GSAP, Lenis and Tone.js. Every model, sound and line of dialogue was made for this town.</p></div>
+      <div><b>Facts used in the game</b><p>OECD Global Plastics Outlook (2022). Pew Charitable Trusts (2020). WHO Commission on Social Connection (2025). Pew Research Center (2019). US EPA heat island research. Civic Economics.</p></div>
+      <div><b>Say hi</b><p>Type <kbd>hello</kbd> anywhere on this page. Something might happen.</p><button class="totop" id="totop" data-cursor="read">Back to the top ↑</button></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 VOXPOP. All characters are fictional.</span><span>Printed in Hoshimachi. 星町新聞</span></div>
+  </footer>
+
+  <div id="rin-toast" class="rin-toast" hidden><img id="rt-img" alt="" /><p id="rt-text"></p></div>
+  <canvas id="confetti"></canvas>
+  <div id="wipe" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <script type="module" src="/src/landing/main.js"></script>
+  <noscript><p style="position:fixed;inset:auto 0 0 0;padding:16px;background:#e63946;color:#fff;font-family:sans-serif;z-index:999">VOXPOP needs JavaScript and WebGL. Please turn JavaScript on.</p></noscript>
+</body>
+</html>

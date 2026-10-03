@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#14111c" />
+  <title>VOXPOP: Play</title>
+  <meta name="description" content="Play VOXPOP. Walk a tiny town, ask real questions, print the front page." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e63946'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' font-family='Arial Black' fill='%23fff'%3EV%3C/text%3E%3C/svg%3E" />
+</head>
+<body class="game">
+  <canvas id="gl" aria-label="VOXPOP game world"></canvas>
+
+  <!-- boot -->
+  <section id="boot" aria-live="polite">
+    <div class="boot-inner">
+      <div class="boot-roll"><span></span><span></span><span></span></div>
+      <p class="boot-label">PRINTING HOSHIMACHI</p>
+      <div class="boot-bar"><i></i></div>
+      <p class="boot-pct">0%</p>
+      <p class="boot-tip">Tip: talk to everyone. Even the cat.</p>
+    </div>
+  </section>
+
+  <!-- title -->
+  <section id="title" hidden>
+    <div class="title-stripes"></div>
+    <div class="logo" aria-label="VOXPOP">
+      <span class="l">V</span><span class="l">O</span><span class="l">X</span><span class="l red">P</span><span class="l red">O</span><span class="l red">P</span>
+    </div>
+    <p class="title-sub"><span>声を集めろ</span> Every town has a voice. Go ask for it.</p>
+    <nav class="title-menu" aria-label="Main menu">
+      <button class="tbtn" data-act="continue" hidden><b>01</b> Continue shift</button>
+      <button class="tbtn" data-act="new"><b>02</b> <span class="new-label">Start your first shift</span></button>
+      <a class="tbtn" href="./index.html"><b>03</b> Back to the site</a>
+    </nav>
+    <p class="title-hint">Press <kbd>Enter</kbd> or tap to begin. Headphones recommended.</p>
+  </section>
+
+  <!-- HUD -->
+  <section id="hud" hidden>
+    <div class="assign" id="assign">
+      <div class="assign-tag">ASSIGNMENT <b id="a-no">01</b></div>
+      <h2 id="a-title">The Plastic Tide</h2>
+      <div class="assign-dots" id="a-dots"></div>
+      <p class="assign-obj" id="a-obj">Interview 4 residents</p>
+    </div>
+    <div class="cal" id="cal">
+      <div class="cal-date"><b id="c-date">10/05</b><span id="c-day">MON</span></div>
+      <div class="cal-time"><i id="c-icon"></i><span id="c-time">MORNING</span></div>
+    </div>
+    <div class="tools">
+      <button class="tool" id="t-note" aria-label="Open notebook (N)"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z M8 8h8 M8 12h8 M8 16h5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="badge" id="t-note-badge" hidden>!</span></button>
+      <button class="tool" id="t-music" aria-label="Toggle music (M)"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+      <button class="tool" id="t-pause" aria-label="Pause (Esc)"><svg viewBox="0 0 24 24"><path d="M8 5v14 M16 5v14" stroke="currentColor" stroke-width="3"/></svg></button>
+    </div>
+    <div class="prompt" id="prompt" hidden><kbd id="p-key">E</kbd><span id="p-text">Interview</span></div>
+    <div id="arrows"></div>
+    <div id="bubbles"></div>
+    <div class="scoopcount" id="scoopcount"><b>0</b>/12 scoops</div>
+    <div id="joystick"><div class="knob"></div></div>
+    <button id="act" aria-label="Interact">TALK</button>
+    <button id="jumpbtn" aria-label="Jump">JUMP</button>
+    <div class="controls-hint" id="controls-hint">
+      <span><kbd>WASD</kbd> walk</span><span><kbd>Shift</kbd> run</span><span><kbd>Space</kbd> jump</span><span><kbd>E</kbd> talk</span><span><kbd>Drag</kbd> look</span><span><kbd>N</kbd> notebook</span>
+    </div>
+  </section>
+
+  <!-- dialogue -->
+  <section id="dialogue" hidden aria-live="polite">
+    <div class="dlg-portrait"><img id="d-img" alt="" /></div>
+    <div class="dlg-box">
+      <div class="dlg-name"><b id="d-name">Name</b><span id="d-role">Role</span></div>
+      <p class="dlg-text" id="d-text"></p>
+      <span class="dlg-next" aria-hidden="true">▼</span>
+    </div>
+    <div class="dlg-choices" id="d-choices"></div>
+  </section>
+
+  <!-- assignment brief -->
+  <section id="brief" hidden>
+    <div class="brief-card">
+      <div class="brief-top"><span>NEW ASSIGNMENT</span><b id="b-no">01</b></div>
+      <h3 id="b-jp">プラスチックの波</h3>
+      <h2 id="b-title">The Plastic Tide</h2>
+      <p class="brief-topic" id="b-topic">Topic</p>
+      <p class="brief-text" id="b-text">Brief</p>
+      <div class="brief-fact"><b>DID YOU KNOW</b><p id="b-fact"></p><small id="b-src"></small></div>
+      <div class="brief-voices" id="b-voices"></div>
+      <button class="bigbtn" id="b-go">Accept assignment <kbd>E</kbd></button>
+    </div>
+  </section>
+
+  <!-- stamp -->
+  <section id="stamp" hidden>
+    <div class="stamp-wrap">
+      <div class="stamp-badge">VOICE<br/>COLLECTED</div>
+      <img id="s-img" alt="" />
+      <blockquote id="s-quote"></blockquote>
+      <cite id="s-who"></cite>
+      <div class="stamp-count" id="s-count"></div>
+    </div>
+  </section>
+
+  <!-- notebook -->
+  <section id="notebook" hidden>
+    <div class="nb">
+      <div class="nb-tabs" id="nb-tabs"></div>
+      <div class="nb-page" id="nb-page"></div>
+      <button class="nb-close" id="nb-close" aria-label="Close notebook">✕</button>
+    </div>
+  </section>
+
+  <!-- front page -->
+  <section id="frontpage" hidden>
+    <div class="paper" id="paper"></div>
+    <button class="bigbtn print" id="fp-print">PRINT IT <kbd>E</kbd></button>
+  </section>
+
+  <!-- pause -->
+  <section id="pause" hidden>
+    <div class="pause-bg"></div>
+    <div class="pause-panel">
+      <h2>PAUSED<small>一時停止</small></h2>
+      <button class="pbtn" data-act="resume">Resume</button>
+      <button class="pbtn" data-act="notebook">Notebook</button>
+      <div class="settings">
+        <label>Music <input type="range" min="0" max="1" step="0.05" id="set-music" /></label>
+        <label>Sound <input type="range" min="0" max="1" step="0.05" id="set-sfx" /></label>
+        <label>Quality
+          <select id="set-quality"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+        </label>
+      </div>
+      <button class="pbtn" data-act="reset">Restart from day one</button>
+      <a class="pbtn" href="./index.html">Back to the site</a>
+      <div class="pause-keys">
+        <span><kbd>WASD</kbd> / stick: walk</span><span><kbd>Shift</kbd>: run</span><span><kbd>Space</kbd>: jump</span><span><kbd>E</kbd>: talk, use</span><span><kbd>Q</kbd>: wave</span><span><kbd>C</kbd>: photo mode</span><span><kbd>N</kbd>: notebook</span><span>Drag or right stick: camera</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" aria-live="polite"></div>
+  <canvas id="confetti"></canvas>
+  <section id="ending" hidden><div class="end-lines" id="end-lines"></div><div class="credits" id="credits"></div></section>
+  <section id="daychange" hidden aria-live="polite">
+    <div class="dc-band b1"></div><div class="dc-band b2"></div>
+    <div class="dc-card">
+      <div class="dc-old" id="dc-old"><b>10/05</b><span>MON</span></div>
+      <div class="dc-new" id="dc-new"><b>10/06</b><span>TUE</span></div>
+      <div class="dc-time" id="dc-time">NOON</div>
+    </div>
+    <p class="dc-note" id="dc-note">A new day. A new question.</p>
+  </section>
+  <div id="splash" hidden><div class="sp-bg"></div><div class="sp-text" id="sp-text">SCOOP!</div><div class="sp-sub" id="sp-sub">Story complete</div></div>
+  <div id="fade"></div>
+  <div id="flash"></div>
+
+  <script type="module" src="/src/game/main.js"></script>
+  <noscript><p style="position:fixed;inset:auto 0 0 0;padding:16px;background:#e63946;color:#fff;font-family:sans-serif;z-index:999">VOXPOP needs JavaScript and WebGL. Please turn JavaScript on.</p></noscript>
+</body>
+</html>
