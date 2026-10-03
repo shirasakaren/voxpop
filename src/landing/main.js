@@ -123,7 +123,7 @@ function computeShot(dt) {
   } else if (shot === 'rin') {
     const d = rin.dir;
     const t = shotT;
-    surfaceShot(target, d, { height: 1.9 + (1 - t) * 7, back: 5.2 + (1 - t) * 9, side: -1.2, lookUp: 1.2, fwd: rin.fwd.clone().negate(), shift: m ? 0 : 1.9 });
+    surfaceShot(target, d, { height: 1.9 + (1 - t) * 7, back: 5.2 + (1 - t) * 9, side: -1.2, lookUp: 1.2, fwd: rin.fwd.clone().negate(), shift: m ? 0 : 0.7 });
   } else if (shot === 'town') {
     const a = districtDirs[townIdx], b = districtDirs[Math.min(townIdx + 1, districtDirs.length - 1)];
     const dir = a.clone().lerp(b, townBlend).normalize();

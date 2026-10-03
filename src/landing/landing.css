@@ -148,7 +148,7 @@ html[data-time] .hero-sub { text-shadow: 0 0 18px var(--bg); }
 .reveal { will-change: transform, opacity; }
 
 /* STORY */
-.story { background: linear-gradient(90deg, var(--panel) 0 56%, transparent 80%); }
+.story { background: linear-gradient(90deg, var(--panel) 0 46%, transparent 64%); }
 .story-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(30px, 6vw, 100px); align-items: start; }
 .story-text { max-width: 640px; }
 .story-text p { font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; margin: 0 0 22px; font-weight: 500; }
@@ -376,3 +376,4 @@ html[data-time] .hero-sub { text-shadow: 0 0 18px var(--bg); }
   .hero-meta, .hero-hint, .hero-sticker { display: none; }
   .town-lede { display: none; }
 }
+.story-text p { text-shadow: 0 0 14px var(--bg), 0 0 4px var(--bg); }
