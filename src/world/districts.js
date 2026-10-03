@@ -60,7 +60,7 @@ export class Site {
     this.b.push(fr.m);
     fn(this.b, fr);
     this.b.pop();
-    if (collide) this.w.addBox(fr.d, fr.f, collide[0], collide[1], collide[2] ?? 0, collide[3] ?? 0, collide[4] ?? 5);
+    if (collide) this.w.addBox(fr.d, fr.f, collide[0], collide[1], collide[2] ?? 0, collide[3] ?? 0, collide[4] ?? 1);
     return fr;
   }
   sign(fr, tex, { x = 0, y = 2, z = 0, ry = 0, w = 2, h = 0.6, glow = true, double = false } = {}) {
@@ -135,10 +135,10 @@ function herald(W) {
     b.box(2.2, 0.9, 0.05, 0, 0.6, 0.92, '#fff7e0', { glow: true });
     for (let i = 0; i < 5; i++) b.box(0.32, 0.45, 0.04, -0.8 + i * 0.4, 0.75, 0.96, ['#e63946', '#14111c', '#457b9d', '#f4a261', '#2a9d8f'][i], { outline: false });
     K.bike(b, 2.6, 0.6, 0.2, '#2a9d8f'); K.bike(b, 3.2, 0.6, 0.1, '#e63946');
-  }, { collide: [1.6, 1.2] });
+  }, { collide: [1.6, 1.2, 0, 0, 2.6] });
   S.sign(kk, signTexture('NEWS', { bg: '#14111c', fg: '#ffd60a', w: 256, h: 96, font: FONT_COND }), { y: 2.35, z: 1.42, w: 1.6, h: 0.55 });
   // planters + trees
-  [[3.5, 9.5], [-3.5, 9.5], [9, -3], [-9, -3]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 1.1, seed: i + 3 }), { collide: [0.5, 0.5] }));
+  [[3.5, 9.5], [-3.5, 9.5], [9, -3], [-9, -3]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 1.1, seed: i + 3 }), { collide: [0.5, 0.5, 0, 0, 3.4] }));
   // newspaper boxes by the HQ
   [[-2.4, 10], [2.4, 10]].forEach(([x, z], i) => S.put(x, z, 180, (b) => { b.box(0.6, 1.0, 0.5, 0, 0, 0, i ? '#457b9d' : '#e63946'); b.box(0.45, 0.35, 0.03, 0, 0.55, 0.26, '#fbf6ea', { glow: true }); }, { collide: [0.35, 0.3] }));
   S.finish('herald');
@@ -189,7 +189,7 @@ function station(W) {
       const fr = S.put(cx, cz, angU + 90 * side, (b) => {
         K.shop(b, { w: 2.65, h: 3.3, d: 3, color: wall, awn, seed: 30 + idx });
         if (idx === 0) K.flowerBuckets(b, 0.4, 1.9);
-      }, { collide: [1.4, 1.6] });
+      }, { collide: [1.4, 1.6, 0, 0, 3.6] });
       S.sign(fr, signTexture(jp, { bg: awn, fg: '#fff', w: 160, h: 420, vertical: true }), { x: 1.15, y: 2.4, z: 1.75, w: 0.42, h: 1.1, ry: 0 });
       S.sign(fr, signTexture(en, { bg: '#14111c', fg: '#fff', w: 512, h: 96, font: FONT_COND }), { y: 2.55, z: 1.52, w: 2.3, h: 0.42 });
     }
@@ -209,7 +209,7 @@ function station(W) {
   S.sign(ent, signTexture('星町 ARCADE STREET', { bg: '#14111c', fg: '#ffd60a', w: 1024, h: 140, font: FONT_DISPLAY }), { y: 4.85, z: 0.17, w: 6.2, h: 0.82, double: true });
 
   // trees and bikes around the plaza
-  [[4, -6], [-2, 7], [6.5, -2.5]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 0.95, seed: 50 + i }), { collide: [0.5, 0.5] }));
+  [[4, -6], [-2, 7], [6.5, -2.5]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 0.95, seed: 50 + i }), { collide: [0.5, 0.5, 0, 0, 3.2] }));
   S.put(-6.5, 2.5, 90, (b) => { for (let i = 0; i < 4; i++) K.bike(b, i * 0.55 - 0.8, 0, Math.PI / 2, ['#e63946', '#ffd60a', '#2a9d8f', '#14111c'][i]); }, { collide: [1.2, 0.6] });
   S.finish('station');
 }
@@ -271,9 +271,9 @@ function shrine(W) {
     b.add(new THREE.TorusGeometry(0.6, 0.09, 6, 16), '#e9d8a6', { y: 1.4, rx: Math.PI / 2, outline: false });
     for (let i = 0; i < 4; i++) b.box(0.12, 0.3, 0.02, Math.sin(i * 1.57) * 0.66, 1.15, Math.cos(i * 1.57) * 0.66, '#ffffff', { ry: i * 1.57, outline: false });
     b.ico(1.6, 0, 3.6, 0, '#3a7d44', 1); b.ico(1.1, 0.9, 3.0, 0.4, '#4f9d4a', 1); b.ico(1.0, -0.9, 3.2, -0.3, '#2f6b3a', 1); b.ico(0.9, 0, 4.6, 0, '#5bb35a', 1);
-  }, { collide: [0.7, 0.7] });
+  }, { collide: [0.7, 0.7, 0, 0, 5.5] });
   // sakura ring
-  [[3.8, 2.4], [4.2, -1.8], [-3.6, -2.2], [2.8, 5.0], [-2.6, 5.4]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { kind: 'sakura', s: 1.05, seed: 70 + i }), { collide: [0.45, 0.45] }));
+  [[3.8, 2.4], [4.2, -1.8], [-3.6, -2.2], [2.8, 5.0], [-2.6, 5.4]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { kind: 'sakura', s: 1.05, seed: 70 + i }), { collide: [0.45, 0.45, 0, 0, 3.2] }));
   W.petalSources.push(S.dir(0, 0));
   // omikuji rack
   S.put(2.6, -1.0, face, (b) => { b.box(1.6, 1.2, 0.1, 0, 0, 0, '#6b4226'); for (let i = 0; i < 10; i++) b.box(0.06, 0.18, 0.04, -0.7 + i * 0.155, 0.9 - (i % 2) * 0.3, 0.07, '#ffffff', { outline: false }); }, { collide: [0.9, 0.2] });
@@ -321,7 +321,7 @@ function park(W) {
     W.addInteract('bench', fr.d, 1.3, { f: fr.f });
   });
   // trees
-  [[7, 3], [-7, -4], [6, -6], [-1, 8], [8.5, -1], [-8, 3], [3, 8.5]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 1.1 + (i % 3) * 0.15, seed: 90 + i, color: i % 2 ? '#4f9d4a' : '#5aa65a' }), { collide: [0.5, 0.5] }));
+  [[7, 3], [-7, -4], [6, -6], [-1, 8], [8.5, -1], [-8, 3], [3, 8.5]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 1.1 + (i % 3) * 0.15, seed: 90 + i, color: i % 2 ? '#4f9d4a' : '#5aa65a' }), { collide: [0.5, 0.5, 0, 0, 3.6] }));
   const vm = S.put(4.8, 4.8, -135, (b) => K.vending(b, 0, 0, 0, '#06d6a0'), { collide: [0.55, 0.45] });
   W.addInteract('vending', vm.d, 1.6, { f: vm.f });
   S.finish('park');
@@ -338,7 +338,7 @@ function beach(W) {
     b.box(1.4, 0.6, 0.05, 0, 2.75, 0.71, '#c7f0ff', { glow: true });
     b.cone(1.5, 0.6, 0, 3.55, -0.1, '#ffffff', 4, { ry: Math.PI / 4 });
     b.box(0.6, 0.06, 1.6, 0, 1.2, 1.4, '#f8f4ea', { rx: -0.9, outline: false });
-  }, { collide: [1.1, 1.1] });
+  }, { collide: [1.1, 1.1, 0, 0, 4] });
   S.sign(lt, signTexture('LIFEGUARD', { bg: '#e63946', fg: '#fff', w: 512, h: 96, font: FONT_COND }), { y: 3.25, z: 0.72, w: 1.6, h: 0.3 });
   W.flags.push({ m: lt.m, x: 0.8, z: 0.8, h: 4.2, color: '#ffd60a' });
   // umi no ie huts
@@ -348,7 +348,7 @@ function beach(W) {
       b.box(4.6, 0.2, 3.6, 0, 2.1, 0.3, c);
       b.box(3.6, 1.2, 0.05, 0, 0.6, 1.51, '#fff4d6', { glow: true });
       K.awning(b, 4.0, 1.9, 1.5, c);
-    }, { collide: [2.2, 1.6] });
+    }, { collide: [2.2, 1.6, 0, 0, 2.6] });
     S.sign(fr, signTexture(jp, { bg: '#fff', fg: c, w: 512, h: 140 }), { y: 2.55, z: 1.82, w: 2.0, h: 0.55 });
   });
   // umbrellas, towels, boards, palms
@@ -363,7 +363,7 @@ function beach(W) {
       b.box(0.8, 0.03, 1.7, 0.9, 0, 0.2, cols[0], { outline: false });
     }, { collide: [0.25, 0.25] });
   }
-  [[-3.8, -8.8], [3.6, -8.5], [-12.5, -7], [12.5, -8]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { kind: 'palm', s: 1.0 + (i % 2) * 0.2, seed: 110 + i }), { collide: [0.35, 0.35] }));
+  [[-3.8, -8.8], [3.6, -8.5], [-12.5, -7], [12.5, -8]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { kind: 'palm', s: 1.0 + (i % 2) * 0.2, seed: 110 + i }), { collide: [0.35, 0.35, 0, 0, 4] }));
   [[5.8, -11.5, '#f77f00'], [6.4, -11.4, '#3a86ff'], [7.0, -11.6, '#ffffff']].forEach(([x, z, c]) => S.put(x, z, 0, (b) => b.add(new THREE.CapsuleGeometry(0.22, 1.6, 4, 8), c, { y: 0.9, sz: 0.25, rz: 0.15 })));
   // plastic bottles washed up (the story of assignment 01)
   const trash = ['#90e0ef', '#b7e4c7', '#ffffff', '#ff8fab', '#ffd60a'];
@@ -524,7 +524,7 @@ function homes(W) {
     b.box(6.2, 0.25, 4.4, 0, 2.3, 0, '#e63946', { outline: false });
     b.box(5.2, 1.9, 0.06, 0, 0.2, 2.11, '#e6fbff', { glow: true });
     for (let i = 0; i < 4; i++) b.box(0.9, 1.3, 0.08, -1.8 + i * 1.2, 0.3, 1.6, ['#ffd60a', '#ff8fab', '#90e0ef', '#b7e4c7'][i], { outline: false });
-  }, { collide: [3.2, 2.3] });
+  }, { collide: [3.2, 2.3, 0, 0, 3.2] });
   S.sign(mk, signTexture('HOSHI MART 24', { bg: '#06d6a0', fg: '#fff', w: 768, h: 128, font: FONT_COND }), { y: 2.75, z: 2.22, w: 4.2, h: 0.65 });
   // small houses
   [[-150, 10, '#f4a261', '#9c2c2c'], [-178, 6.6, '#a8dadc', '#264653'], [150, 8.6, '#ffe5b4', '#6d597a'], [-20, 8.5, '#e9c46a', '#2a6f97']].forEach(([ang, dist, c, r], i) => {
@@ -534,7 +534,7 @@ function homes(W) {
       K.building(b, { w: 3.6, h: 2.8, d: 3.2, color: c, roof: 'gable', roofColor: r, seed: 140 + i, lit: 0.6 });
       K.fence(b, 0, 2.4, 3.6, 0, '#f8f4ea');
       K.bush(b, 1.4, 2.0, 0.8);
-    }, { collide: [2.0, 1.9] });
+    }, { collide: [2.0, 1.9, 0, 0, 4.2] });
   });
   // mailboxes + bus stop
   const bs = S.put(3.8, -3.2, -60, (b) => {
@@ -543,7 +543,7 @@ function homes(W) {
     b.box(1.6, 0.1, 0.4, 0.9, 0.45, 0.2, '#8d99ae');
   }, { collide: [0.3, 0.3] });
   S.put(-5.6, -1.2, 90, (b) => { for (let i = 0; i < 6; i++) b.box(0.3, 0.3, 0.3, -0.8 + (i % 3) * 0.32, 0.6 + Math.floor(i / 3) * 0.32, 0, '#adb5bd'); b.box(1.1, 0.6, 0.35, -0.48, 0, 0, '#6c757d'); }, { collide: [0.7, 0.3] });
-  [[6, 2], [-3, -6.5], [-6.6, 4.6]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 1.0, seed: 150 + i }), { collide: [0.5, 0.5] }));
+  [[6, 2], [-3, -6.5], [-6.6, 4.6]].forEach(([x, z], i) => S.put(x, z, 0, (b) => K.tree(b, 0, 0, { s: 1.0, seed: 150 + i }), { collide: [0.5, 0.5, 0, 0, 3.2] }));
   [[-3.8, 6], [5.2, 6.6]].forEach(([x, z]) => S.put(x, z, 0, (b) => K.pole(b, 0, 0, 6), { collide: [0.2, 0.2] }));
   W.landmarks.homes = S.dir(0, 0);
   S.finish('homes');
@@ -619,7 +619,7 @@ function scatter(W) {
     K.building(b, { w: 3 + rnd() * 1.4, h: tall ? 4.6 : 2.6 + rnd() * 0.6, d: 3 + rnd(), color: cols[i % cols.length], roof: tall ? 'flat' : rnd() < 0.5 ? 'gable' : 'hip', roofColor: roofs[i % roofs.length], seed: 300 + i, lit: 0.5 });
     if (rnd() < 0.5) K.tree(b, 2.6, 1.5, { s: 0.8, seed: 400 + i });
     b.pop();
-    W.addBox(d, f, 2.1, 2.1);
+    W.addBox(d, f, 2.1, 2.1, 0, 0, 4.8);
   }
   // trees
   for (let i = 0; i < 210; i++) {

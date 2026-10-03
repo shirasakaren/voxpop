@@ -418,7 +418,13 @@ function bindInput() {
     const act = b.dataset.act;
     if (act === 'resume') ui.closePause();
     if (act === 'notebook') { ui.closePause(); ui.openNotebook(state); }
-    if (act === 'reset') { if (confirm('Start the week over? Your notebook will be cleared.')) { store.set(SAVE_KEY, fresh()); location.reload(); } }
+    if (act === 'reset') {
+      if (b.dataset.armed) { store.set(SAVE_KEY, fresh()); location.reload(); return; }
+      b.dataset.armed = '1';
+      const label = b.textContent;
+      b.textContent = 'Tap again to clear your notebook';
+      setTimeout(() => { delete b.dataset.armed; b.textContent = label; }, 3500);
+    }
   }));
 }
 
@@ -435,7 +441,7 @@ function togglePhoto() {
     const a = document.createElement('a');
     a.href = url; a.download = 'voxpop-photo.png';
     a.click();
-    ui.toast('Snap!', 'Photo saved to your downloads.');
+    ui.toast('Snap!', 'Photo taken. Check your downloads.');
   } else {
     audio.shutter();
   }
@@ -562,6 +568,10 @@ window.__vox = {
     const d = n.ch.dir.clone().multiplyScalar(R).addScaledVector(n.ch.fwd, 1.7).normalize();
     const q = new THREE.Quaternion().setFromUnitVectors(player.dir, d);
     player.rotateAll(q); player.dir.copy(d); player.orthonormalize();
+    world.place(player.char.root, player.dir, player.fwd);
+    const tt = n.ch.dir.clone().multiplyScalar(R).sub(d.clone().multiplyScalar(R));
+    tt.addScaledVector(player.dir, -tt.dot(player.dir)).normalize();
+    player.fwd.copy(tt); player.camF.copy(tt);
     world.place(player.char.root, player.dir, player.fwd);
     rig.snap();
   },

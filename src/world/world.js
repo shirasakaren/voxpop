@@ -78,7 +78,7 @@ export class World {
     this.root.add(mesh);
     return mesh;
   }
-  addBox(d, f, hx, hz, ox = 0, oz = 0, h = 5) {
+  addBox(d, f, hx, hz, ox = 0, oz = 0, h = 1) {
     const r = new THREE.Vector3().crossVectors(d, f).normalize();
     this.boxes.push({ c: d.clone(), r, f: f.clone(), hx, hz, ox, oz, h: h + heightAt(d), reach: Math.cos((Math.hypot(hx, hz) + Math.hypot(ox, oz) + 3) / R) });
   }

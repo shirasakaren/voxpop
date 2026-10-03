@@ -161,7 +161,8 @@ export class CameraRig {
     const base = p.pos.clone().addScaledVector(up, 1.1);
     outLook.copy(base);
     const dist = Math.min(this.dist, this.safeDist ?? this.dist);
-    outPos.copy(base).addScaledVector(p.camF, -dist * Math.cos(this.pitch)).addScaledVector(up, dist * Math.sin(this.pitch));
+    const pitch = Math.max(this.pitch, this.effPitch ?? this.pitch);
+    outPos.copy(base).addScaledVector(p.camF, -dist * Math.cos(pitch)).addScaledVector(up, dist * Math.sin(pitch));
   }
 
   update(dt, input) {
@@ -173,17 +174,34 @@ export class CameraRig {
       this.targetDist = THREE.MathUtils.clamp(this.targetDist + z * 1.2, 6, 24);
     }
     this.dist += (this.targetDist - this.dist) * Math.min(1, dt * 5);
-    // pull the camera in when a building sits between it and Rin
+    // keep buildings out of the shot: first tilt the camera up, then pull it in
     if (this.mode === 'follow' && this.world) {
       const up = this.p.up;
       const base = this.p.pos.clone().addScaledVector(up, 1.1);
-      const dirOut = new THREE.Vector3().addScaledVector(this.p.camF, -Math.cos(this.pitch)).addScaledVector(up, Math.sin(this.pitch));
-      let safe = this.dist;
-      for (let i = 2; i <= 10; i++) {
-        const t = (i / 10) * this.dist;
-        if (this.world.occluded(base.clone().addScaledVector(dirOut, t))) { safe = Math.max(3.2, t - 1.2); break; }
+      const test = (pitch, dist) => {
+        const dirOut = new THREE.Vector3().addScaledVector(this.p.camF, -Math.cos(pitch)).addScaledVector(up, Math.sin(pitch));
+        for (let i = 2; i <= 10; i++) {
+          const t = (i / 10) * dist;
+          if (this.world.occluded(base.clone().addScaledVector(dirOut, t))) return t;
+        }
+        return -1;
+      };
+      let pitch = this.pitch, safe = this.dist;
+      if (test(pitch, this.dist) >= 0) {
+        let found = false;
+        for (let k = 1; k <= 4 && !found; k++) {
+          const p2 = Math.min(80 * DEG, this.pitch + k * 9 * DEG);
+          if (test(p2, this.dist) < 0) { pitch = p2; found = true; }
+        }
+        if (!found) {
+          pitch = Math.min(80 * DEG, this.pitch + 36 * DEG);
+          const hit = test(pitch, this.dist);
+          safe = hit < 0 ? this.dist : Math.max(3.4, hit - 1.0);
+        }
       }
-      this.safeDist = this.safeDist === undefined ? safe : this.safeDist + (safe - this.safeDist) * Math.min(1, dt * (safe < this.safeDist ? 10 : 2));
+      const kp = Math.min(1, dt * (pitch > (this.effPitch ?? pitch) ? 6 : 1.5));
+      this.effPitch = this.effPitch === undefined ? pitch : this.effPitch + (pitch - this.effPitch) * kp;
+      this.safeDist = this.safeDist === undefined ? safe : this.safeDist + (safe - this.safeDist) * Math.min(1, dt * (safe < this.safeDist ? 8 : 1.5));
     }
     const tp = new THREE.Vector3(), tl = new THREE.Vector3();
     this.compute(tp, tl);

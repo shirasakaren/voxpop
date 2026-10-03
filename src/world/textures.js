@@ -9,7 +9,7 @@ export async function loadFonts() {
     await Promise.all([
       document.fonts.load(`64px "Dela Gothic One"`, 'あ星A'),
       document.fonts.load(`64px "Anton"`, 'A'),
-      document.fonts.load(`64px "Zen Kaku Gothic New"`, 'あ星'),
+      
       document.fonts.load(`64px "Space Grotesk"`, 'A'),
     ]);
   } catch (e) { /* fonts are a nicety */ }
