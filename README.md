@@ -27,6 +27,13 @@ npm run preview
 
 `dev.html` (world viewer) and `chars.html` (character line-up) are development tools and are not part of the build.
 
+## Published site
+
+Pushes to `main` build and deploy both pages through GitHub Actions:
+
+- Story site: https://shirasakaren.github.io/voxpop/
+- Game: https://shirasakaren.github.io/voxpop/play.html
+
 ## Controls
 
 | Action | Keyboard | Touch | Gamepad |

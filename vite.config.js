@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const r = (p) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
-  base: './',
+  base: '/voxpop/',
   build: {
     target: 'es2020',
     chunkSizeWarningLimit: 1600,
